@@ -1,0 +1,120 @@
+openapi: 3.0.0
+info:
+  title: System Status API
+  description: API to retrieve various system status information including uptime, CPU usage, memory usage, disk usage, and environment variables.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/sysstatus
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check the health of the system.
+      responses:
+        '200':
+          description: System is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+
+  /uptime:
+    get:
+      summary: Get system uptime
+      description: Retrieve the current uptime and system time.
+      responses:
+        '200':
+          description: Successfully retrieved uptime
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  systime:
+                    type: string
+                    format: date-time
+                    example: "2024-10-27T12:00:00Z"
+                  uptime:
+                    type: string
+                    example: "1d 02h 34m 56s"
+
+  /cpu:
+    get:
+      summary: Get CPU usage information
+      description: Retrieve current CPU usage statistics.
+      responses:
+        '200':
+          description: Successfully retrieved CPU information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cpu_usage:
+                    type: string
+                    example: "20%"
+
+  /mem:
+    get:
+      summary: Get memory usage information
+      description: Retrieve current memory usage statistics.
+      responses:
+        '200':
+          description: Successfully retrieved memory information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    example: 16384
+                  used:
+                    type: integer
+                    example: 8192
+                  free:
+                    type: integer
+                    example: 8192
+
+  /disk:
+    get:
+      summary: Get disk usage information
+      description: Retrieve current disk usage statistics.
+      responses:
+        '200':
+          description: Successfully retrieved disk information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    example: 1000000
+                  used:
+                    type: integer
+                    example: 500000
+                  free:
+                    type: integer
+                    example: 500000
+
+  /env:
+    get:
+      summary: Get environment variables
+      description: Retrieve current environment variables.
+      responses:
+        '200':
+          description: Successfully retrieved environment variables
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  env:
+                    type: object
+                    additionalProperties:
+                      type: string
