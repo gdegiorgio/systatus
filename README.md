@@ -11,7 +11,7 @@
 
 > **Note:** Systatus is currently in beta, and we are actively working on expanding functionality. Be sure to update frequently to get the latest features and improvements.
 
-<img src="./resources/assets/logo.png" align="right">
+<img src="./resources/assets/systatus.png" align="right">
 
 ### What is Systatus?
 
@@ -22,7 +22,7 @@ With just a of code, Systatus can provide your application with predefined route
 
 
 
-# Available Routes
+### Available Routes
 
 Systatus provides the following default routes, which are also documented in [`swagger.yml`](./swagger.yml):
 
@@ -31,7 +31,7 @@ Systatus provides the following default routes, which are also documented in [`s
 
 
 
-## Installation
+### Installation
 
 To install Systatus, use the following command:
 
@@ -40,7 +40,7 @@ go get github.com/gdegiorgio/systatus
 ```
 
 
-### Quick startup
+###  Quick startup
 
 ```golang
 package main
