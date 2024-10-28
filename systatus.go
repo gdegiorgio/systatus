@@ -11,8 +11,9 @@ import (
 )
 
 type SystatusOptions struct {
-	Prefix    string
-	ExposeEnv bool
+	Prefix      string
+	ExposeEnv   bool
+	Healthcheck func(w http.ResponseWriter, r *http.Request)
 }
 
 type HealthResponse struct{}
@@ -27,7 +28,12 @@ type EnvResponse struct {
 }
 
 func Enable(opts SystatusOptions) {
-	http.HandleFunc(fmt.Sprintf("%s/health", opts.Prefix), handleHealth)
+	if opts.Healthcheck == nil {
+		http.HandleFunc(fmt.Sprintf("%s/health", opts.Prefix), handleHealth)
+	} else {
+		http.HandleFunc(fmt.Sprintf("%s/health", opts.Prefix), opts.Healthcheck)
+	}
+
 	http.HandleFunc(fmt.Sprintf("%s/uptime", opts.Prefix), handleUptime)
 	http.HandleFunc(fmt.Sprintf("%s/cpu", opts.Prefix), handleCPU)
 	http.HandleFunc(fmt.Sprintf("%s/mem", opts.Prefix), handleMem)
