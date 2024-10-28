@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	opts := systatus.SystatusOptions{Prefix: "/dev"}
+	opts := systatus.SystatusOptions{Prefix: "/dev", ExposeEnv: true}
 	systatus.Enable(opts)
 	fmt.Println("Starting server on :3333")
 	if err := http.ListenAndServe(":3333", nil); err != nil {
