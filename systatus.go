@@ -11,6 +11,7 @@ import (
 )
 
 type SystatusOptions struct {
+	Mux         *http.ServeMux
 	Prefix      string
 	ExposeEnv   bool
 	Healthcheck func(w http.ResponseWriter, r *http.Request)
@@ -28,19 +29,26 @@ type EnvResponse struct {
 }
 
 func Enable(opts SystatusOptions) {
-	if opts.Healthcheck == nil {
-		http.HandleFunc(fmt.Sprintf("%s/health", opts.Prefix), handleHealth)
-	} else {
-		http.HandleFunc(fmt.Sprintf("%s/health", opts.Prefix), opts.Healthcheck)
+
+	mux := http.DefaultServeMux
+
+	if opts.Mux != nil {
+		mux = opts.Mux
 	}
 
-	http.HandleFunc(fmt.Sprintf("%s/uptime", opts.Prefix), handleUptime)
-	http.HandleFunc(fmt.Sprintf("%s/cpu", opts.Prefix), handleCPU)
-	http.HandleFunc(fmt.Sprintf("%s/mem", opts.Prefix), handleMem)
-	http.HandleFunc(fmt.Sprintf("%s/disk", opts.Prefix), handleDisk)
+	if opts.Healthcheck == nil {
+		mux.HandleFunc(fmt.Sprintf("%s/health", opts.Prefix), handleHealth)
+	} else {
+		mux.HandleFunc(fmt.Sprintf("%s/health", opts.Prefix), opts.Healthcheck)
+	}
+
+	mux.HandleFunc(fmt.Sprintf("%s/uptime", opts.Prefix), handleUptime)
+	mux.HandleFunc(fmt.Sprintf("%s/cpu", opts.Prefix), handleCPU)
+	mux.HandleFunc(fmt.Sprintf("%s/mem", opts.Prefix), handleMem)
+	mux.HandleFunc(fmt.Sprintf("%s/disk", opts.Prefix), handleDisk)
 
 	if opts.ExposeEnv {
-		http.HandleFunc(fmt.Sprintf("%s/env", opts.Prefix), handleEnv)
+		mux.HandleFunc(fmt.Sprintf("%s/env", opts.Prefix), handleEnv)
 	}
 }
 
