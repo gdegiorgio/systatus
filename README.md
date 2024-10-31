@@ -53,7 +53,7 @@ import (
 
 func main() {
 	opts := SystatusOptions{ Prefix : "/dev"}
-    systatus.Enable(opts)
+	systatus.Enable(opts)
 	http.ListenAndServe(":8080", nil)
 }
 ```
