@@ -23,7 +23,11 @@ type UptimeResponse struct {
 	Uptime  string `json:"uptime"`
 }
 type CPURepsponse struct{}
-type MemResponse struct{}
+type MemResponse struct {
+	TotalAlloc uint64
+	Alloc      uint64
+	Sys        uint64
+}
 type EnvResponse struct {
 	Env map[string]string `json:"env"`
 }
@@ -83,6 +87,19 @@ func handleCPU(w http.ResponseWriter, r *http.Request) {
 
 }
 func handleMem(w http.ResponseWriter, r *http.Request) {
+	res := &MemResponse{}
+
+	var stats runtime.MemStats
+
+	runtime.ReadMemStats(&stats)
+
+	res.Sys = stats.Sys
+	res.TotalAlloc = stats.TotalAlloc
+	res.Alloc = stats.Alloc
+
+	w.WriteHeader(200)
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(res)
 
 }
 func handleDisk(w http.ResponseWriter, r *http.Request) {
