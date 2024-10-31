@@ -1,6 +1,7 @@
 package systatus
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,10 +12,11 @@ import (
 )
 
 type SystatusOptions struct {
-	Mux         *http.ServeMux
-	Prefix      string
-	ExposeEnv   bool
-	Healthcheck func(w http.ResponseWriter, r *http.Request)
+	Mux           *http.ServeMux
+	Prefix        string
+	ExposeEnv     bool
+	Healthcheck   func(w http.ResponseWriter, r *http.Request)
+	SensitiveKeys []string
 }
 
 type HealthResponse struct{}
@@ -31,6 +33,10 @@ type MemResponse struct {
 type EnvResponse struct {
 	Env map[string]string `json:"env"`
 }
+
+type contextKey string
+
+const sensitiveKeysContextKey contextKey = "sensitiveKeys"
 
 func Enable(opts SystatusOptions) {
 
@@ -52,7 +58,11 @@ func Enable(opts SystatusOptions) {
 	mux.HandleFunc(fmt.Sprintf("%s/disk", opts.Prefix), handleDisk)
 
 	if opts.ExposeEnv {
-		mux.HandleFunc(fmt.Sprintf("%s/env", opts.Prefix), handleEnv)
+		envHandler := func(w http.ResponseWriter, r *http.Request) {
+			ctx := context.WithValue(r.Context(), sensitiveKeysContextKey, opts.SensitiveKeys)
+			handleEnv(w, r.WithContext(ctx))
+		}
+		mux.HandleFunc(fmt.Sprintf("%s/env", opts.Prefix), envHandler)
 	}
 }
 
@@ -106,19 +116,45 @@ func handleDisk(w http.ResponseWriter, r *http.Request) {
 
 }
 func handleEnv(w http.ResponseWriter, r *http.Request) {
-
 	res := EnvResponse{}
 	env := os.Environ()
+
+	// Get sensitive keys from context (set by Enable function)
+	sensitiveKeys := r.Context().Value(sensitiveKeysContextKey).([]string)
 
 	res.Env = make(map[string]string, len(env))
 
 	for _, val := range env {
 		split := strings.Split(val, "=")
-		res.Env[split[0]] = split[1]
+		key, value := split[0], split[1]
+
+		// Check if this key should be masked
+		if containsSensitiveKey(key, sensitiveKeys) {
+			res.Env[key] = "[REDACTED]"
+		} else {
+			res.Env[key] = value
+		}
 	}
 
 	w.WriteHeader(200)
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(res)
+}
 
+// Helper function to check if a key is sensitive
+func containsSensitiveKey(key string, sensitiveKeys []string) bool {
+	key = strings.ToLower(key)
+	for _, sensitive := range sensitiveKeys {
+		if strings.ToLower(sensitive) == key {
+			return true
+		}
+		// Also check if key contains common sensitive patterns
+		if strings.Contains(key, "password") ||
+			strings.Contains(key, "secret") ||
+			strings.Contains(key, "token") ||
+			strings.Contains(key, "key") {
+			return true
+		}
+	}
+	return false
 }
