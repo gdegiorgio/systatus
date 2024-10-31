@@ -100,8 +100,8 @@ func handleEnv(w http.ResponseWriter, r *http.Request) {
 		res.Env[split[0]] = split[1]
 	}
 
+	w.WriteHeader(200)
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(res)
-	w.WriteHeader(200)
 
 }
