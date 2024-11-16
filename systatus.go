@@ -17,7 +17,9 @@ type SystatusOptions struct {
 	Healthcheck func(w http.ResponseWriter, r *http.Request)
 }
 
-type HealthResponse struct{}
+type HealthResponse struct {
+	Status string
+}
 type UptimeResponse struct {
 	Systime string `json:"systime"`
 	Uptime  string `json:"uptime"`
@@ -57,7 +59,8 @@ func Enable(opts SystatusOptions) {
 }
 
 func handleHealth(w http.ResponseWriter, r *http.Request) {
-
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(HealthResponse{Status: "HEALTHY"})
 }
 
 func handleUptime(w http.ResponseWriter, r *http.Request) {
