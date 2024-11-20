@@ -1,13 +1,8 @@
 package systatus
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
-	"os/exec"
-	"runtime"
-	"strings"
 )
 
 type SystatusOptions struct {
@@ -17,24 +12,9 @@ type SystatusOptions struct {
 	Healthcheck func(w http.ResponseWriter, r *http.Request)
 }
 
-type HealthResponse struct {
-	Status string
-}
-type UptimeResponse struct {
-	Systime string `json:"systime"`
-	Uptime  string `json:"uptime"`
-}
-type CPURepsponse struct{}
-type MemResponse struct {
-	TotalAlloc uint64
-	Alloc      uint64
-	Sys        uint64
-}
-type EnvResponse struct {
-	Env map[string]string `json:"env"`
-}
-
 func Enable(opts SystatusOptions) {
+
+	var healthcheck = HandleHealth
 
 	mux := http.DefaultServeMux
 
@@ -42,86 +22,17 @@ func Enable(opts SystatusOptions) {
 		mux = opts.Mux
 	}
 
-	if opts.Healthcheck == nil {
-		mux.HandleFunc(fmt.Sprintf("%s/health", opts.Prefix), handleHealth)
-	} else {
-		mux.HandleFunc(fmt.Sprintf("%s/health", opts.Prefix), opts.Healthcheck)
+	if opts.Healthcheck != nil {
+		healthcheck = opts.Healthcheck
 	}
 
-	mux.HandleFunc(fmt.Sprintf("%s/uptime", opts.Prefix), handleUptime)
-	mux.HandleFunc(fmt.Sprintf("%s/cpu", opts.Prefix), handleCPU)
-	mux.HandleFunc(fmt.Sprintf("%s/mem", opts.Prefix), handleMem)
-	mux.HandleFunc(fmt.Sprintf("%s/disk", opts.Prefix), handleDisk)
+	mux.HandleFunc(fmt.Sprintf("%s/health", opts.Prefix), healthcheck)
+	mux.HandleFunc(fmt.Sprintf("%s/uptime", opts.Prefix), HandleUptime)
+	mux.HandleFunc(fmt.Sprintf("%s/cpu", opts.Prefix), HandleCPU)
+	mux.HandleFunc(fmt.Sprintf("%s/mem", opts.Prefix), HandleMem)
+	mux.HandleFunc(fmt.Sprintf("%s/disk", opts.Prefix), HandleDisk)
 
 	if opts.ExposeEnv {
-		mux.HandleFunc(fmt.Sprintf("%s/env", opts.Prefix), handleEnv)
+		mux.HandleFunc(fmt.Sprintf("%s/env", opts.Prefix), HandleEnv)
 	}
-}
-
-func handleHealth(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(HealthResponse{Status: "HEALTHY"})
-}
-
-func handleUptime(w http.ResponseWriter, r *http.Request) {
-
-	res := UptimeResponse{}
-
-	if runtime.GOOS == "windows" {
-		// TODO Implement windows uptime
-	} else {
-		cmdoutput, err := exec.Command("/bin/uptime").Output()
-		if err != nil {
-			http.Error(w, "Could not exec uptime command on this machine", http.StatusInternalServerError)
-			return
-		}
-		split := strings.Split(string(cmdoutput), " ")
-
-		res.Systime = split[1]
-		// Remove comma e.g 3:05,
-		res.Uptime = strings.Split(split[4], ",")[0]
-
-		w.WriteHeader(200)
-		w.Header().Add("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(res)
-	}
-}
-func handleCPU(w http.ResponseWriter, r *http.Request) {
-
-}
-func handleMem(w http.ResponseWriter, r *http.Request) {
-	res := &MemResponse{}
-
-	var stats runtime.MemStats
-
-	runtime.ReadMemStats(&stats)
-
-	res.Sys = stats.Sys
-	res.TotalAlloc = stats.TotalAlloc
-	res.Alloc = stats.Alloc
-
-	w.WriteHeader(200)
-	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(res)
-
-}
-func handleDisk(w http.ResponseWriter, r *http.Request) {
-
-}
-func handleEnv(w http.ResponseWriter, r *http.Request) {
-
-	res := EnvResponse{}
-	env := os.Environ()
-
-	res.Env = make(map[string]string, len(env))
-
-	for _, val := range env {
-		split := strings.Split(val, "=")
-		res.Env[split[0]] = split[1]
-	}
-
-	w.WriteHeader(200)
-	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(res)
-
 }

@@ -70,10 +70,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  total:
+                  total_alloc:
                     type: integer
                     example: 16384
-                  used:
+                  alloc:
                     type: integer
                     example: 8192
                   free:
