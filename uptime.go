@@ -15,7 +15,7 @@ type UptimeResponse struct {
 	Uptime  string `json:"uptime"`
 }
 
-func HandleUptime(opts UptimeHandlerOpts) func(w http.ResponseWriter, r *http.Request) {
+func handleUptime(opts UptimeHandlerOpts) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		res := UptimeResponse{}
 		cmdoutput, err := exec.Command("/bin/uptime").Output()

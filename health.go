@@ -16,7 +16,7 @@ type HealthResponse struct {
 	Status string `json:"status"`
 }
 
-func HandleHealth(opts HealthHandlerOpts) func(w http.ResponseWriter, r *http.Request) {
+func handleHealth(opts HealthHandlerOpts) func(w http.ResponseWriter, r *http.Request) {
 	if opts.Healthcheck != nil {
 		log.Debug().Msg("Found a custom healthcheck")
 		return opts.Healthcheck

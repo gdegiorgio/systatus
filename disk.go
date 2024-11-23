@@ -7,6 +7,6 @@ type DiskHandlerOpts struct {
 }
 type DiskResponse struct{}
 
-func HandleDisk(opts DiskHandlerOpts) func(w http.ResponseWriter, r *http.Request) {
+func handleDisk(opts DiskHandlerOpts) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {}
 }
