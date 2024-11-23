@@ -3,12 +3,17 @@ package systatus
 import (
 	"fmt"
 	"net/http"
+	"os"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 type SystatusOptions struct {
 	Mux               *http.ServeMux
 	Prefix            string
 	ExposeEnv         bool
+	PrettyLogger      bool
 	HealthHandlerOpts HealthHandlerOpts
 	CPUHandlerOpts    CPUHandlerOpts
 	EnvHandlerOpts    EnvHandlerOpts
@@ -25,6 +30,10 @@ func useMiddlewares(handler func(w http.ResponseWriter, r *http.Request), middle
 }
 
 func Enable(opts SystatusOptions) {
+
+	if opts.PrettyLogger {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	}
 
 	mux := http.DefaultServeMux
 

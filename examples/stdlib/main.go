@@ -17,8 +17,12 @@ func customHealthCheck(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	opts := systatus.SystatusOptions{
-		Prefix:    "/dev",
-		ExposeEnv: true,
+		Prefix:       "/dev",
+		ExposeEnv:    true,
+		PrettyLogger: true,
+		EnvHandlerOpts: systatus.EnvHandlerOpts{
+			SensitiveKeys: []string{"PASSWORD"},
+		},
 		HealthHandlerOpts: systatus.HealthHandlerOpts{
 			Middlewares: []func(next http.HandlerFunc) http.HandlerFunc{middleware.Logger},
 			Healthcheck: customHealthCheck,
