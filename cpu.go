@@ -7,6 +7,6 @@ type CPUHandlerOpts struct {
 }
 type CPUResponse struct{}
 
-func HandleCPU(opts CPUHandlerOpts) func(w http.ResponseWriter, r *http.Request) {
+func handleCPU(opts CPUHandlerOpts) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {}
 }

@@ -31,13 +31,13 @@ func Enable(opts SystatusOptions) {
 	if opts.Mux != nil {
 		mux = opts.Mux
 	}
-	mux.HandleFunc(fmt.Sprintf("%s/health", opts.Prefix), useMiddlewares(HandleHealth(opts.HealthHandlerOpts), opts.CPUHandlerOpts.Middlewares))
-	mux.HandleFunc(fmt.Sprintf("%s/uptime", opts.Prefix), useMiddlewares(HandleUptime(opts.UptimeHandlerOpts), opts.UptimeHandlerOpts.Middlewares))
-	mux.HandleFunc(fmt.Sprintf("%s/cpu", opts.Prefix), useMiddlewares(HandleCPU(opts.CPUHandlerOpts), opts.CPUHandlerOpts.Middlewares))
+	mux.HandleFunc(fmt.Sprintf("%s/health", opts.Prefix), useMiddlewares(handleHealth(opts.HealthHandlerOpts), opts.CPUHandlerOpts.Middlewares))
+	mux.HandleFunc(fmt.Sprintf("%s/uptime", opts.Prefix), useMiddlewares(handleUptime(opts.UptimeHandlerOpts), opts.UptimeHandlerOpts.Middlewares))
+	mux.HandleFunc(fmt.Sprintf("%s/cpu", opts.Prefix), useMiddlewares(handleCPU(opts.CPUHandlerOpts), opts.CPUHandlerOpts.Middlewares))
 	mux.HandleFunc(fmt.Sprintf("%s/mem", opts.Prefix), useMiddlewares(HandleMem(opts.MemHandlerOpts), opts.MemHandlerOpts.Middlewares))
-	mux.HandleFunc(fmt.Sprintf("%s/disk", opts.Prefix), useMiddlewares(HandleDisk(opts.DiskHandlerOpts), opts.DiskHandlerOpts.Middlewares))
+	mux.HandleFunc(fmt.Sprintf("%s/disk", opts.Prefix), useMiddlewares(handleDisk(opts.DiskHandlerOpts), opts.DiskHandlerOpts.Middlewares))
 
 	if opts.ExposeEnv {
-		mux.HandleFunc(fmt.Sprintf("%s/env", opts.Prefix), useMiddlewares(HandleEnv(opts.EnvHandlerOpts), opts.EnvHandlerOpts.Middlewares))
+		mux.HandleFunc(fmt.Sprintf("%s/env", opts.Prefix), useMiddlewares(handleEnv(opts.EnvHandlerOpts), opts.EnvHandlerOpts.Middlewares))
 	}
 }

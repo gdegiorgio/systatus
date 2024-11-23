@@ -15,7 +15,7 @@ type EnvResponse struct {
 	Env map[string]string `json:"env"`
 }
 
-func HandleEnv(opts EnvHandlerOpts) func(w http.ResponseWriter, r *http.Request) {
+func handleEnv(opts EnvHandlerOpts) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		res := EnvResponse{}
 		env := os.Environ()
