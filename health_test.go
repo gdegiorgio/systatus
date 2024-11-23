@@ -28,7 +28,7 @@ func TestHealthEndpointDefaultHandler(t *testing.T) {
 	var h HealthResponse
 	err := json.NewDecoder(res.Body).Decode(&h)
 	assert.NoError(t, err)
-	assert.Equal(t, h.Status, "HEALTHY")
+	assert.Equal(t, "HEALTHY", h.Status)
 }
 
 func TestHealthEndpointCustomHandler(t *testing.T) {
@@ -37,11 +37,14 @@ func TestHealthEndpointCustomHandler(t *testing.T) {
 	opts := SystatusOptions{
 		Prefix: "",
 		Mux:    mux,
-		Healthcheck: func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(200)
-			json.NewEncoder(w).Encode(HealthResponse{Status: "HEALTHY-CUSTOM"})
+		HealthHandlerOpts: HealthHandlerOpts{
+			Healthcheck: func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(200)
+				json.NewEncoder(w).Encode(HealthResponse{Status: "HEALTHY-CUSTOM"})
+			},
 		},
 	}
+
 	Enable(opts)
 
 	ts := httptest.NewServer(mux)
@@ -53,5 +56,5 @@ func TestHealthEndpointCustomHandler(t *testing.T) {
 	var h HealthResponse
 	err := json.NewDecoder(res.Body).Decode(&h)
 	assert.NoError(t, err)
-	assert.Equal(t, h.Status, "HEALTHY-CUSTOM")
+	assert.Equal(t, "HEALTHY-CUSTOM", h.Status)
 }
