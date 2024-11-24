@@ -92,13 +92,11 @@ Write unit tests for any new code or changes in functionality.
 
 ```bash
 go test ./...
-Pull Request Guidelines
 ```
 
 Commit Your Changes: Use clear and concise commit messages following [Coventional Commit](https://www.conventionalcommits.org/en/v1.0.0/)
 
 ```bash
-Copy code
 git commit -m "feat: implement /health"
 ```
 
@@ -111,7 +109,7 @@ git push origin feature/improve-health-check
 9. **Open a Pull Request**
 
 
-Contact
+### Contacts
 For questions or additional support, you can contact me using info provided in my [Github Profile Page](https://github.com/gdegiorgio)
 
 Thank you for contributing to Systatus! Let’s work together to create something awesome. 🚀
