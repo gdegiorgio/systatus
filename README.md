@@ -12,8 +12,7 @@
 ### What is Systatus?
 
 Systatus is a lightweight Go library inspired by Spring Boot's Actuator, designed to add system observability and monitoring endpoints to any Go application. It allows you to expose essential system information and application health metrics through HTTP routes, enabling quick insights and diagnostics.
-
-With just a of code, Systatus can provide your application with predefined routes to monitor metrics like CPU, memory, and disk usage, as well as application uptime and a simple health check.
+With just two lines of code, Systatus can provide your application with predefined routes to monitor metrics like CPU, memory, and disk usage, as well as application uptime and a simple health check.
 
 
 
@@ -56,17 +55,17 @@ func main() {
 
 ### Systatus Options
 
-| _**Option**_       | **_Type_**                   | **_Default_** | **_Description_**                                                                                                  |
-|--------------------|------------------------------|---------------|--------------------------------------------------------------------------------------------------------------------|
-| `Prefix`           | `string`                     | `""`          | Specifies a URL prefix for all systatus endpoints. For example, setting `Prefix: "/dev"` results in `/dev/health`. |
-| `ExposeEnv`        | `boolean`                    | `false`       | Enables the `/env` endpoint, exposing environment variables. Use cautiously as this may reveal sensitive data.     |
-| `PrettyLogger`     | `boolean`                    | `false`       | 	If set to `true`, replaces JSON-formatted logging with human-readable plain text logs.                            |
-| HealthHandlerOpts  | [`/health`](#health) options | `nil`         | Configuration for the `/health` handler                                                                            |
-| CPUHandlerOpts     | [`/cpu`](#cpu) options       | `nil`         | Configuration for the `/cpu` handler                                                                               |
-| EnvhHandlerOpts    | [`/env`](#env) options       | `nil`         | Configuration for the `/env` handler                                                                               |
-| DiskHandlerOpts    | [`/disk`](#disk) options     | `nil`         | Configuration for the `/disk` handler                                                                              |
-| MemHandlerOpts     | [`/mem`](#mem) options       | `nil`         | Configuration for the `/mem` handler                                                                               |
-| 	UptimeHandlerOpts | [`/uptime`](#uptime) options | `nil`         | UConfiguration for the `/uptime` handler                                                                           |
+| _**Option**_         | **_Type_**                   | **_Default_** | **_Description_**                                                                                                  |
+|----------------------|------------------------------|---------------|--------------------------------------------------------------------------------------------------------------------|
+| `Prefix`             | `string`                     | `""`          | Specifies a URL prefix for all systatus endpoints. For example, setting `Prefix: "/dev"` results in `/dev/health`. |
+| `ExposeEnv`          | `boolean`                    | `false`       | Enables the `/env` endpoint, exposing environment variables. Use cautiously as this may reveal sensitive data.     |
+| `PrettyLogger`       | `boolean`                    | `false`       | 	If set to `true`, replaces JSON-formatted logging with human-readable plain text logs.                            |
+| `HealthHandlerOpts`  | [`/health`](#health) options | `nil`         | Configuration for the `/health` handler                                                                            |
+| `CPUHandlerOpts`     | [`/cpu`](#cpu) options       | `nil`         | Configuration for the `/cpu` handler                                                                               |
+| `EnvHandlerOpts`     | [`/env`](#env) options       | `nil`         | Configuration for the `/env` handler                                                                               |
+| `DiskHandlerOpts`    | [`/disk`](#disk) options     | `nil`         | Configuration for the `/disk` handler                                                                              |
+| `MemHandlerOpts`     | [`/mem`](#mem) options       | `nil`         | Configuration for the `/mem` handler                                                                               |
+| 	`UptimeHandlerOpts` | [`/uptime`](#uptime) options | `nil`         | UConfiguration for the `/uptime` handler                                                                           |
 
 #### Notes:
 - **Options with nil defaults**: These options are optional and customizable through their respective configurations. Reference specific handler documentation (linked in the table) for details.
@@ -78,17 +77,124 @@ func main() {
 ## Available Handlers
 
 ### `/health`
+
+This endpoint is used to report system health status.
+
+
 #### Options
+
+
+
+| _**Option**_  | **_Type_**                                       | **_Default_** | **_Description_**                                                                                                                                               |
+|---------------|--------------------------------------------------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Healtcheck`  | `func(w http.ResponseWriter, r *http.Request)`   | `nil`         | Allows users to define a custom health check function. This function overrides the default /health handler logic and must write the HTTP response directly.     |
+| `Middlewares` | `[]func(next http.HandlerFunc) http.HandlerFunc` | `[]`          | A list of middleware functions applied to the request pipeline. Each middleware wraps the handler, enabling custom preprocessing or postprocessing of requests. | 
+
+#### HealthResponse
+
+
+| _**Option**_ | **_Type_**                                                                                   | **_Description_**     |
+|--------------|----------------------------------------------------------------------------------------------|-----------------------|
+| `status`     | `string`                                                                                     | Current System status |
+
+
+```json
+{
+  "status" : "HEALTHY"
+}
+```
+
 ### `/env`
+
+This endpoint is used to expose system environment variables.
+> **Note:** This endpoint will not be exposed by default unless you set `ExposeEnv` to `true` in [`SystatusOptions`](#systatus-options).
+
+
 #### Options
+
+
+| _**Option**_    | **_Type_**                                       | **_Default_** | **_Description_**                                                                                                                                               |
+|-----------------|--------------------------------------------------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `SensitiveKeys` | `[]string`                                       | `[]`          | A list of key names whose values should be masked in logs or responses to prevent exposure of sensitive data.                                                   |
+| `Middlewares`   | `[]func(next http.HandlerFunc) http.HandlerFunc` | `[]`          | A list of middleware functions applied to the request pipeline. Each middleware wraps the handler, enabling custom preprocessing or postprocessing of requests. | 
+
+####  EnvResponse
+
+
+| _**Field**_ | **_Type_**          | **_Description_**                              |
+|-------------|---------------------|------------------------------------------------|
+| `env`       | `map[string]string` | A map representing system environment variable |
+
+```json
+{
+  "env" : {
+    "GO_VERSION": "1.23.0",
+    "APIKEY" : "************************"
+  }
+}
+
+```
 ### `/cpu`
-#### Options
-### `/disk`
-#### Options
+
+This endpoint is not available yet and will soon be implemented.
+
 ### `/mem`
+
+This endpoint is used to retrieve runtime memory usage statistics
+
 #### Options
+
+
+| _**Option**_    | **_Type_**                                       | **_Default_** | **_Description_**                                                                                                                                               |
+|-----------------|--------------------------------------------------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `SensitiveKeys` | `[]string`                                       | `[]`          | A list of key names whose values should be masked in logs or responses to prevent exposure of sensitive data.                                                   |
+| `Middlewares`   | `[]func(next http.HandlerFunc) http.HandlerFunc` | `[]`          | A list of middleware functions applied to the request pipeline. Each middleware wraps the handler, enabling custom preprocessing or postprocessing of requests. | 
+
+####  MemResponse
+
+
+| _**Field**_  | **_Type_** | **_Description_**                                                                                    |
+|--------------|------------|------------------------------------------------------------------------------------------------------|
+| `TotalAlloc` | `uint64`   | The cumulative bytes allocated and freed by the application.                                         |
+| `Alloc`      | `uint64`   | The current number of bytes allocated in heap objects.                                               |
+| `Sys`        | `uint64`   | The total bytes of memory obtained from the operating system (includes heap, stack, and other uses). |
+
+```json
+{
+  "total_alloc": 1048576,
+  "alloc": 524288,
+  "sys": 2097152
+}
+
+```
+
 ### `/uptime`
+
+
+
+
 #### Options
 
 
+| _**Option**_    | **_Type_**                                       | **_Default_** | **_Description_**                                                                                                                                               |
+|-----------------|--------------------------------------------------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Middlewares`   | `[]func(next http.HandlerFunc) http.HandlerFunc` | `[]`          | A list of middleware functions applied to the request pipeline. Each middleware wraps the handler, enabling custom preprocessing or postprocessing of requests. | 
 
+
+
+#### UptimeResponse
+
+Systime	string	The current system time in a human-readable format (e.g., ISO 8601).
+Uptime	string	The server's uptime since it was started, formatted as hh:mm:ss.
+
+| _**Field**_ | **_Type_** | **_Description_**                                                                                    |
+|-------------|------------|------------------------------------------------------------------------------------------------------|
+| `Systime`   | `string`   | The current system time in a human-readable format (e.g., ISO 8601)                                        |
+| `Uptime`    | `string`   | The server's uptime since it was started, formatted as hh:mm:ss.                                             |
+
+```json
+{
+  "systime": "2024-11-24T12:34:56Z",
+  "uptime": "01:23:45"
+}
+```
