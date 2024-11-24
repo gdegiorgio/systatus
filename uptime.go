@@ -64,7 +64,7 @@ func getWinUptime() (UptimeResponse, error) {
 	minutes := strings.Split(splitCmd[4], ":")
 
 	return UptimeResponse{
-		Uptime: formatWinDate(strings.TrimSpace(days[1]), strings.TrimSpace(hours[1]), strings.TrimSpace(minutes[1])),
+		Uptime: formatDate(strings.TrimSpace(days[1]), strings.TrimSpace(hours[1]), strings.TrimSpace(minutes[1])),
 	}, nil
 }
 
@@ -73,14 +73,20 @@ func getUptime() (UptimeResponse, error) {
 	if err != nil {
 		return UptimeResponse{}, err
 	}
-	splitCmd := strings.Split(string(cmdoutput), " ")
+	log.Debug().Msgf("System uptime: %v", strings.Split(string(cmdoutput), " "))
+
+	splitCmd := strings.Split(strings.TrimSpace(string(cmdoutput)), " ")
+
+	systime := strings.TrimSpace(splitCmd[0])
+	uptime := strings.TrimSpace(strings.Split(splitCmd[4], ",")[0])
+
 	return UptimeResponse{
-		Systime: strings.TrimSpace(splitCmd[1]),
-		Uptime:  strings.TrimSpace(strings.Split(splitCmd[4], ",")[0]),
+		Systime: systime,
+		Uptime:  uptime,
 	}, nil
 }
 
-func formatWinDate(d string, h string, m string) string {
+func formatDate(d string, h string, m string) string {
 
 	days, _ := strconv.Atoi(d)
 	hours, _ := strconv.Atoi(h)
