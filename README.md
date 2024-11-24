@@ -1,4 +1,4 @@
-# Systatus
+# Systatus 🔎
 
 
 
@@ -11,7 +11,7 @@
 
 ### What is Systatus?
 
-Systatus is a lightweight Go library inspired by Spring Boot's Actuator, designed to add system observability and monitoring endpoints to any Go application. It allows you to expose essential system information and application health metrics through HTTP routes, enabling quick insights and diagnostics.
+Systatus is a lightweight Go library inspired by [Spring Boot's Actuator](https://docs.spring.io/spring-boot/reference/actuator/index.html), designed to add system observability and monitoring endpoints to any Go application. It allows you to expose essential system information and application health metrics through HTTP routes, enabling quick insights and diagnostics.
 With just two lines of code, Systatus can provide your application with predefined routes to monitor metrics like CPU, memory, and disk usage, as well as application uptime and a simple health check.
 
 
