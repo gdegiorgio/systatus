@@ -165,7 +165,7 @@ This endpoint is used to retrieve runtime memory usage statistics
 
 ### `/uptime`
 
-
+This endpoint is used to report system uptime and current system time.
 
 
 #### Options
