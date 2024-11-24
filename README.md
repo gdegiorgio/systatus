@@ -1,10 +1,5 @@
 # Systatus 🔎
-
-
-
-[![GitHub License](https://img.shields.io/github/license/gdegiorgio/systatus?style=for-the-badge&color=blue&link=https%3A%2F%2Fgithub.com%gdegiorgio%systatus%2Fblob%2Fmain%2FLICENSE)](https://github.com/YourUsername/GopherMetrics/blob/main/LICENSE) 
-![Go Reference](https://img.shields.io/badge/reference-grey?style=for-the-badge&logo=go&link=https%3A%2F%2Fgithub.com%gdegiorgio%FsystatUs) 
-
+![Go Version](https://img.shields.io/github/go-mod/go-version/gdegiorgio/systatus)
 > **Note:** Systatus is currently in beta, and we are actively working on expanding functionality. Be sure to update frequently to get the latest features and improvements.
 
 <img src="./resources/assets/systatus.png" align="right">
