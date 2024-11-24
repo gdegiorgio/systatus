@@ -2,11 +2,14 @@ package systatus
 
 import (
 	"encoding/json"
-	"github.com/rs/zerolog/log"
+	"fmt"
 	"net/http"
 	"os/exec"
 	"runtime"
+	"strconv"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
 
 type UptimeHandlerOpts struct {
@@ -49,12 +52,20 @@ func handleUptime(opts UptimeHandlerOpts) func(w http.ResponseWriter, r *http.Re
 
 func getWinUptime() (UptimeResponse, error) {
 	log.Warn().Msg("If FastBoot is enabled, uptime on Windows may be tracked incorrectly")
-	cmdoutput, err := exec.Command("systeminfo | find \"System Boot Time\"").Output()
+	cmdoutput, err := exec.Command("powershell", "-Command", "(get-date) – (gcim Win32_OperatingSystem).LastBootUpTime").Output()
 	if err != nil {
 		return UptimeResponse{}, err
 	}
-	log.Debug().Msg(string(cmdoutput))
-	return UptimeResponse{}, nil
+
+	splitCmd := strings.Split(strings.ReplaceAll(string(cmdoutput), "\r\n", "\n"), "\n")
+
+	days := strings.Split(splitCmd[2], ":")
+	hours := strings.Split(splitCmd[3], ":")
+	minutes := strings.Split(splitCmd[4], ":")
+
+	return UptimeResponse{
+		Uptime: formatWinDate(strings.TrimSpace(days[1]), strings.TrimSpace(hours[1]), strings.TrimSpace(minutes[1])),
+	}, nil
 }
 
 func getUptime() (UptimeResponse, error) {
@@ -67,4 +78,23 @@ func getUptime() (UptimeResponse, error) {
 		Systime: strings.TrimSpace(splitCmd[1]),
 		Uptime:  strings.TrimSpace(strings.Split(splitCmd[4], ",")[0]),
 	}, nil
+}
+
+func formatWinDate(d string, h string, m string) string {
+
+	days, _ := strconv.Atoi(d)
+	hours, _ := strconv.Atoi(h)
+	minutes, _ := strconv.Atoi(m)
+
+	if days < 10 {
+		d = fmt.Sprintf("0%d", days)
+	}
+	if hours < 10 {
+		h = fmt.Sprintf("0%d", hours)
+	}
+	if minutes < 10 {
+		m = fmt.Sprintf("0%d", minutes)
+	}
+
+	return fmt.Sprintf("%s:%s:%s", d, h, m)
 }
