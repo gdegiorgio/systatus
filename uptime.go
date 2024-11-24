@@ -49,7 +49,10 @@ func handleUptime(opts UptimeHandlerOpts) func(w http.ResponseWriter, r *http.Re
 
 func getWinUptime() (UptimeResponse, error) {
 	log.Warn().Msg("If FastBoot is enabled, uptime on Windows may be tracked incorrectly")
-	cmdoutput, _ := exec.Command("systeminfo | find \"System Boot Time\"").Output()
+	cmdoutput, err := exec.Command("systeminfo | find \"System Boot Time\"").Output()
+	if err != nil {
+		return UptimeResponse{}, err
+	}
 	log.Debug().Msg(string(cmdoutput))
 	return UptimeResponse{}, nil
 }
