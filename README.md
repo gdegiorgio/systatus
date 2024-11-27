@@ -189,7 +189,7 @@ Uptime	string	The server's uptime since it was started, formatted as hh:mm:ss.
 
 ```json
 {
-  "systime": "2024-11-24T12:34:56Z",
-  "uptime": "01:23:45"
+  "systime": "2024-11-27T20:58:09+01:00",
+  "uptime": 2817580
 }
 ```
