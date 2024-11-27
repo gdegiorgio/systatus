@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -10,9 +11,8 @@ import (
 )
 
 func customHealthCheck(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "application/json")
-	fmt.Fprint(w, `{"status":"application is healthy"}`)
+	json.NewEncoder(w).Encode(systatus.HealthResponse{Status: "HEALTHY"})
 }
 
 func main() {

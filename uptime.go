@@ -2,36 +2,39 @@ package systatus
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/rs/zerolog/log"
 	"net/http"
+	"os"
 	"os/exec"
 	"runtime"
 	"strconv"
 	"strings"
-
-	"github.com/rs/zerolog/log"
+	"time"
 )
 
 type UptimeHandlerOpts struct {
 	Middlewares []func(next http.HandlerFunc) http.HandlerFunc
 }
 type UptimeResponse struct {
-	Systime string `json:"systime"`
-	Uptime  string `json:"uptime"`
+	Systime string  `json:"systime"`
+	Uptime  float64 `json:"uptime"`
 }
 
 func handleUptime(opts UptimeHandlerOpts) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		res := UptimeResponse{}
+		res := UptimeResponse{
+			Systime: time.Now().Format(time.RFC3339),
+		}
+
 		var err error
 
 		log.Debug().Msgf("Handling uptime on %s machine", runtime.GOOS)
 
 		if runtime.GOOS == "windows" {
-			res, err = getWinUptime()
+			res.Uptime, err = getWinUptime()
 		} else {
-			res, err = getUptime()
+			res.Uptime, err = getUptime()
 		}
 
 		if err != nil {
@@ -50,57 +53,38 @@ func handleUptime(opts UptimeHandlerOpts) func(w http.ResponseWriter, r *http.Re
 	}
 }
 
-func getWinUptime() (UptimeResponse, error) {
+func getWinUptime() (float64, error) {
 	log.Warn().Msg("If FastBoot is enabled, uptime on Windows may be tracked incorrectly")
 	cmdoutput, err := exec.Command("powershell", "-Command", "(get-date) – (gcim Win32_OperatingSystem).LastBootUpTime").Output()
 	if err != nil {
-		return UptimeResponse{}, err
+		return 0, err
 	}
 
 	splitCmd := strings.Split(strings.ReplaceAll(string(cmdoutput), "\r\n", "\n"), "\n")
 
-	days := strings.Split(splitCmd[2], ":")
-	hours := strings.Split(splitCmd[3], ":")
-	minutes := strings.Split(splitCmd[4], ":")
+	ms := strings.Split(splitCmd[10], ":")[1]
+	uptime, err := strconv.ParseFloat(ms, 64)
 
-	return UptimeResponse{
-		Uptime: formatDate(strings.TrimSpace(days[1]), strings.TrimSpace(hours[1]), strings.TrimSpace(minutes[1])),
-	}, nil
-}
-
-func getUptime() (UptimeResponse, error) {
-	cmdoutput, err := exec.Command("/usr/bin/uptime").Output()
 	if err != nil {
-		return UptimeResponse{}, err
+		return 0, err
 	}
-	log.Debug().Msgf("System uptime: %v", strings.Split(string(cmdoutput), " "))
 
-	splitCmd := strings.Split(strings.TrimSpace(string(cmdoutput)), " ")
-
-	systime := strings.TrimSpace(splitCmd[0])
-	uptime := strings.TrimSpace(strings.Split(splitCmd[4], ",")[0])
-
-	return UptimeResponse{
-		Systime: systime,
-		Uptime:  uptime,
-	}, nil
+	return uptime, nil
 }
 
-func formatDate(d string, h string, m string) string {
+func getUptime() (float64, error) {
+	buf, err := os.ReadFile("/proc/uptime")
 
-	days, _ := strconv.Atoi(d)
-	hours, _ := strconv.Atoi(h)
-	minutes, _ := strconv.Atoi(m)
-
-	if days < 10 {
-		d = fmt.Sprintf("0%d", days)
-	}
-	if hours < 10 {
-		h = fmt.Sprintf("0%d", hours)
-	}
-	if minutes < 10 {
-		m = fmt.Sprintf("0%d", minutes)
+	if err != nil {
+		return 0, err
 	}
 
-	return fmt.Sprintf("%s:%s:%s", d, h, m)
+	data := strings.Split(string(buf), " ")[0]
+	seconds, err := strconv.ParseFloat(data, 64)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return seconds * 1000, nil
 }
