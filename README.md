@@ -182,14 +182,14 @@ This endpoint is used to report system uptime and current system time.
 Systime	string	The current system time in a human-readable format (e.g., ISO 8601).
 Uptime	string	The server's uptime since it was started, formatted as hh:mm:ss.
 
-| _**Field**_ | **_Type_** | **_Description_**                                                                                    |
-|-------------|------------|------------------------------------------------------------------------------------------------------|
-| `Systime`   | `string`   | The current system time in a human-readable format (e.g., ISO 8601)                                        |
-| `Uptime`    | `string`   | The server's uptime since it was started, formatted as hh:mm:ss.                                             |
+| _**Field**_ | **_Type_** | **_Description_**                                          |
+|-------------|------------|------------------------------------------------------------|
+| `Systime`   | `string`   | The current system time in RFC3339 format                  |
+| `Uptime`    | `float64`  | The server's uptime since it was started, in milliseconds. |
 
 ```json
 {
-  "systime": "2024-11-24T12:34:56Z",
-  "uptime": "01:23:45"
+  "systime": "2024-11-27T20:58:09+01:00",
+  "uptime": 2817580
 }
 ```
