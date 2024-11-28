@@ -2,7 +2,7 @@ package systatus
 
 import (
 	"encoding/json"
-	"github.com/rs/zerolog/log"
+	"fmt"
 	"net/http"
 	"os"
 	"os/exec"
@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 type UptimeHandlerOpts struct {
@@ -31,9 +33,14 @@ func handleUptime(opts UptimeHandlerOpts) func(w http.ResponseWriter, r *http.Re
 
 		log.Debug().Msgf("Handling uptime on %s machine", runtime.GOOS)
 
-		if runtime.GOOS == "windows" {
+		switch runtime.GOOS {
+		case "windows":
 			res.Uptime, err = getWinUptime()
-		} else {
+			break
+		case "darwin":
+			res.Uptime, err = getMacOSUptime()
+			break
+		default:
 			res.Uptime, err = getUptime()
 		}
 
@@ -72,6 +79,26 @@ func getWinUptime() (float64, error) {
 	return uptime, nil
 }
 
+func getMacOSUptime() (float64, error) {
+	cmd := "sysctl -n kern.boottime | cut -c9-18"
+	output, err := exec.Command("bash", "-c", cmd).CombinedOutput()
+
+	if err != nil {
+
+		return 0, err
+	}
+
+	data := strings.TrimSpace(string(output))
+	log.Debug().Msgf("%v", data)
+
+	uptime, err := strconv.ParseFloat(data, 64)
+	if err != nil {
+		fmt.Printf("%w", err)
+		return 0, err
+	}
+	return uptime, nil
+}
+
 func getUptime() (float64, error) {
 	buf, err := os.ReadFile("/proc/uptime")
 
@@ -86,5 +113,7 @@ func getUptime() (float64, error) {
 		return 0, err
 	}
 
-	return seconds * 1000, nil
+	uptime := seconds * 1000
+
+	return uptime, nil
 }
