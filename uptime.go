@@ -2,7 +2,6 @@ package systatus
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"os/exec"
@@ -89,11 +88,8 @@ func getMacOSUptime() (float64, error) {
 	}
 
 	data := strings.TrimSpace(string(output))
-	log.Debug().Msgf("%v", data)
-
 	uptime, err := strconv.ParseFloat(data, 64)
 	if err != nil {
-		fmt.Printf("%w", err)
 		return 0, err
 	}
 	return uptime, nil
